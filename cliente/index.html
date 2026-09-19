@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste WebSocket</title>
+</head>
+<body>
+    <h1>Selecione sua jogada</h1>
+
+    <select id="jogada" name="jogada">
+        <option value="" disabled selected hidden>Escolha a sua jogada</option>
+        <option value="pedra">Pedra</option>
+        <option value="papel">Papel</option>
+        <option value="tesoura">Tesoura</option>
+    </select>
+
+    <button onclick="enviar()">
+        Enviar Jogada
+    </button>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:6969");
+
+        socket.onopen = function(){
+            console.log("Conectadinho delicia");
+        };
+
+        socket.onmessage = function(evento){
+            console.log("Servidor disse: ", evento.data);
+        };
+
+        
+        function enviar(){
+            const mensagem = document.getElementById("jogada").value;
+            socket.send(mensagem);
+        }
+    </script>
+</body>
+</html>
