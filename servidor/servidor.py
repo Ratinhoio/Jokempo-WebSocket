@@ -1,27 +1,39 @@
 import asyncio
 import websockets
+import json
 
-
-clientes = set()    
+clientes = set()
+jogador = 0
+numeroDeJogada = 0
 
 async def servidor(websocket):
+    global jogador
 
+    jogador = len(clientes) + 1
     clientes.add(websocket)
     
 
     print("Cliente conectado")
     print("Jogadores conectados:", len(clientes))
 
+    mensagem = {
+        "jogador": f"jogador{jogador}",
+        "tipo": "conexao"
+    }
+
+    await websocket.send(json.dumps(mensagem))
+
     try:
         async for mensagem in websocket:
 
-            print("Mensagem recebida:", mensagem)
+            dados = json.loads(mensagem)
 
-            for cliente in clientes:
+            if dados.get("tipo") == "jogada":
+                for cliente in clientes:
 
-                if cliente != websocket:
-                    
-                    await cliente.send(mensagem)
+                    if cliente != websocket:
+                        
+                        await cliente.send(dados.get("valor"))
 
     finally:
 
