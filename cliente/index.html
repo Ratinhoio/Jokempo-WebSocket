@@ -8,7 +8,8 @@
 
 <body>
 
-    ```
+    <h1>Jokenpo</h1>
+    <h1 id=nomeJogador></h1>
     <h1>Selecione sua jogada</h1>
 
     <select id="jogada" name="jogada">
@@ -38,7 +39,6 @@
 
             console.log("Conectado ao servidor");
 
-            socket.send(JSON.stringify(mensagem));
 
         };
 
@@ -47,18 +47,26 @@
 
             const dados = JSON.parse(evento.data);
 
-            console.log("Eu sou o jogador: ", dados.jogador);
+            if (dados.tipo === "resultado") {
+                document.getElementById("status").innerText = dados.mensagem;
+                document.getElementById("jogada").value = "";
+                document.getElementById("jogada").disabled = false;
+                document.getElementById("botaoEnviar").disabled = false;
+            }
 
-            numeroJogador = dados.jogador;
+            if (dados.tipo === "conexao") {
+                document.getElementById("nomeJogador").innerText =
+                    "Voce eh o  " + dados.jogador;
+                console.log("Eu sou o jogador:", dados.jogador);
+                numeroJogador = dados.jogador;
 
-            //socket.send(JSON.stringify({ jogador: dados.jogador }));
+                document.getElementById("jogada").disabled = false;
+                document.getElementById("botaoEnviar").disabled = false;
+            }
 
-            document.getElementById("jogada").disabled = false;
-
-
-            document.getElementById("botaoEnviar").disabled = false;
-
-
+            if (dados.tipo === "jogada") {
+                console.log("O", dados.jogador, "jogou", dados.valor);
+            }
         };
 
 
