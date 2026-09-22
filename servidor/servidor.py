@@ -3,17 +3,24 @@ import websockets
 import json
 
 clientes = set()
+jogadores = {}
 jogador = 0
 numeroDeJogada = 0
 jogada1 = ""
 jogada2 = ""
+jogador1 = False
+jogador2 = False
 
 async def servidor(websocket):
     global jogador
     global jogada1, jogada2
+    global jogador1, jogador2
+    vitorioso = 0
+    perdedor = 0
 
     jogador = len(clientes) + 1
     clientes.add(websocket)
+    jogadores[websocket] = f"jogador {jogador}"
     
 
     print("Cliente conectado")
@@ -50,9 +57,11 @@ async def servidor(websocket):
                         (jogada1 == "tesoura" and jogada2 == "papel") or
                         (jogada1 == "papel" and jogada2 == "pedra")
                     ):
+                        jogador1 = True
                         resultado = "Jogador 1 venceu"
 
                     else:
+                        jogador2 = True
                         resultado = "Jogador 2 venceu"
 
                     print(resultado)
@@ -64,14 +73,46 @@ async def servidor(websocket):
 
                     for cliente in clientes:
                         await cliente.send(json.dumps(mensagem_resultado))
-                        jogada1 = ""
-                        jogada2 = ""
 
-                        
-                    
+                    if jogador1:
+                        vitorioso = "jogador 1"
+                        perdedor = "jogador 2"
+
+                    elif jogador2:
+                        vitorioso = "jogador 2"
+                        perdedor = "jogador 1"
+
+                    mensagemVitoria = {
+                        "jogador": vitorioso,
+                        "tipo": "vitoria",
+                        "mensagem": "Você venceu!"
+                    }
+
+                    mensagemDerrota = {
+                        "jogador": perdedor,
+                        "tipo": "derrota",
+                        "mensagem": "Você perdeu!"
+                    }
+
+                    for cliente in clientes:
+
+                        if jogadores[cliente] == vitorioso:
+                            await cliente.send(json.dumps(mensagemVitoria))
+                            print(mensagemVitoria)
+
+                        elif jogadores[cliente] == perdedor:
+                            await cliente.send(json.dumps(mensagemDerrota))
+                            print(mensagemDerrota)
+
+                    jogada1 = ""
+                    jogada2 = ""
+
+                    jogador1 = False
+                    jogador2 = False
     finally:
 
         clientes.remove(websocket)
+        del jogadores[websocket]
         jogador -= 1
 
         print("Cliente saiu")

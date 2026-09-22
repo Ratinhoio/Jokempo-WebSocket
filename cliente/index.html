@@ -3,72 +3,105 @@
 <html>
 
 <head>
+
     <title>Jokenpô</title>
+
 </head>
 
 <body>
 
     <h1>Jokenpo</h1>
+
     <h1 id=nomeJogador></h1>
+
     <h1>Selecione sua jogada</h1>
 
     <select id="jogada" name="jogada">
+
         <option value="" disabled selected hidden>
+
             Escolha a sua jogada
+
         </option>
 
         <option value="pedra">Pedra</option>
+
         <option value="papel">Papel</option>
+
         <option value="tesoura">Tesoura</option>
+
     </select>
 
     <button id="botaoEnviar" onclick="enviar()" disabled>
+
         Enviar Jogada
+
     </button>
 
     <p id="status"></p>
 
-
     <script>
 
         const socket = new WebSocket("ws://localhost:6969");
-        let numeroJogador = 0;
 
+        let numeroJogador = 0;
 
         socket.onopen = function () {
 
             console.log("Conectado ao servidor");
 
-
         };
-
 
         socket.onmessage = function (evento) {
 
             const dados = JSON.parse(evento.data);
 
-            if (dados.tipo === "resultado") {
+
+            // if (dados.tipo === "resultado") {
+
+            //     document.getElementById("status").innerText = dados.mensagem;
+
+            //     document.getElementById("jogada").value = "";
+
+            //     document.getElementById("jogada").disabled = false;
+
+            //     document.getElementById("botaoEnviar").disabled = false;
+
+            // }
+
+            if (dados.tipo === "vitoria" && dados.jogador === numeroJogador) {
+                console.log(dados.mensagem);
                 document.getElementById("status").innerText = dados.mensagem;
-                document.getElementById("jogada").value = "";
-                document.getElementById("jogada").disabled = false;
-                document.getElementById("botaoEnviar").disabled = false;
+            } else if (dados.tipo === "derrota" && dados.jogador === numeroJogador) {
+                console.log(dados.mensagem);
+                document.getElementById("status").innerText = dados.mensagem;
             }
 
             if (dados.tipo === "conexao") {
+
                 document.getElementById("nomeJogador").innerText =
+
                     "Voce eh o  " + dados.jogador;
+
                 console.log("Eu sou o jogador:", dados.jogador);
+
                 numeroJogador = dados.jogador;
 
                 document.getElementById("jogada").disabled = false;
+
                 document.getElementById("botaoEnviar").disabled = false;
+
             }
+
+
 
             if (dados.tipo === "jogada") {
-                console.log("O", dados.jogador, "jogou", dados.valor);
-            }
-        };
 
+                console.log("O", dados.jogador, "jogou", dados.valor);
+
+            }
+
+        };
 
         function enviar() {
 
@@ -83,19 +116,22 @@
             }
 
             const mensagem = {
+
                 tipo: "jogada",
+
                 jogador: numeroJogador,
+
                 valor: valorJogada
+
             };
 
             socket.send(JSON.stringify(mensagem));
 
-
             document.getElementById("status").innerText =
+
                 "Aguardando o outro jogador...";
 
             document.getElementById("jogada").disabled = true;
-
 
             document.getElementById("botaoEnviar").disabled = true;
 
