@@ -94,6 +94,11 @@ async def servidor(websocket):
                         "mensagem": "Você perdeu!"
                     }
 
+                    mensagemEmpate = {
+                        "tipo": "empate",
+                        "mensagem": "Empate!"
+                    }
+
                     for cliente in clientes:
 
                         if jogadores[cliente] == vitorioso:
@@ -103,6 +108,10 @@ async def servidor(websocket):
                         elif jogadores[cliente] == perdedor:
                             await cliente.send(json.dumps(mensagemDerrota))
                             print(mensagemDerrota)
+
+                        else:
+                            await cliente.send(json.dumps(mensagemEmpate))
+                            print(mensagemEmpate)
 
                     jogada1 = ""
                     jogada2 = ""

@@ -40,6 +40,10 @@
 
     <p id="status"></p>
 
+    <button id="botaoJogarNovamente" onclick="jogarNovamente()" disabled>
+        Jogar novamente
+    </button>
+
     <script>
 
         const socket = new WebSocket("ws://localhost:6969");
@@ -72,20 +76,29 @@
             if (dados.tipo === "vitoria" && dados.jogador === numeroJogador) {
                 console.log(dados.mensagem);
                 document.getElementById("status").innerText = dados.mensagem;
-            } else if (dados.tipo === "derrota" && dados.jogador === numeroJogador) {
+                document.getElementById("botaoJogarNovamente").disabled = false;
+            }
+
+            else if (dados.tipo === "derrota" && dados.jogador === numeroJogador) {
                 console.log(dados.mensagem);
                 document.getElementById("status").innerText = dados.mensagem;
+                document.getElementById("botaoJogarNovamente").disabled = false;
+            }
+
+            else if (dados.tipo === "empate") {
+                document.getElementById("status").innerText = dados.mensagem;
+                document.getElementById("botaoJogarNovamente").disabled = false;
             }
 
             if (dados.tipo === "conexao") {
 
+                numeroJogador = dados.jogador;
+
                 document.getElementById("nomeJogador").innerText =
 
-                    "Voce eh o  " + dados.jogador;
+                    "Voce eh o  " + numeroJogador;
 
                 console.log("Eu sou o jogador:", dados.jogador);
-
-                numeroJogador = dados.jogador;
 
                 document.getElementById("jogada").disabled = false;
 
@@ -102,6 +115,19 @@
             }
 
         };
+
+        function jogarNovamente() {
+
+            document.getElementById("status").innerText = "";
+
+            document.getElementById("jogada").value = "";
+
+            document.getElementById("jogada").disabled = false;
+
+            document.getElementById("botaoEnviar").disabled = false;
+
+            document.getElementById("botaoJogarNovamente").disabled = true;
+        }
 
         function enviar() {
 
@@ -124,6 +150,7 @@
                 valor: valorJogada
 
             };
+
 
             socket.send(JSON.stringify(mensagem));
 
