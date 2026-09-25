@@ -6,7 +6,6 @@ clientes = set()
 lock = asyncio.Lock()
 jogadores = {}
 jogador = 0
-numeroDeJogada = 0
 jogada1 = ""
 jogada2 = ""
 jogador1 = False
