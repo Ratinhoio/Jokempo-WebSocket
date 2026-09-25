@@ -4,45 +4,195 @@
 
 <head>
 
-    <title>Jokenpô</title>
+    <title>Jokenpo</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #f4f6f8;
+
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 450px;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 16px;
+
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+
+            text-align: center;
+        }
+
+        .titulo {
+            margin-top: 0;
+            margin-bottom: 5px;
+
+            font-size: 32px;
+            color: #222;
+        }
+
+        .subtitulo {
+            margin-top: 0;
+            margin-bottom: 30px;
+
+            color: #888;
+            font-size: 14px;
+        }
+
+        #nomeJogador {
+            font-size: 18px;
+            font-weight: normal;
+
+            color: #555;
+
+            background: #f5f5f5;
+
+            padding: 10px;
+
+            border-radius: 8px;
+
+            margin-bottom: 25px;
+        }
+
+        .label {
+            display: block;
+
+            margin-bottom: 10px;
+
+            font-weight: bold;
+            font-size: 15px;
+
+            text-align: left;
+        }
+
+        select {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ddd;
+            border-radius: 8px;
+
+            background: white;
+
+            font-size: 15px;
+
+            outline: none;
+
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: #555;
+        }
+
+        button {
+            width: 100%;
+
+            margin-top: 15px;
+
+            padding: 12px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #333;
+            color: white;
+
+            font-size: 15px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #111;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            min-height: 20px;
+
+            margin-top: 25px;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            background: #f7f7f7;
+
+            color: #666;
+
+            font-size: 14px;
+        }
+    </style>
 
 </head>
 
 <body>
 
-    <h1>Jokenpo</h1>
+    <div class="container">
 
-    <h1 id=nomeJogador></h1>
+        <h1 class="titulo">Jokenpo</h1>
 
-    <h1>Selecione sua jogada</h1>
+        <p class="subtitulo">
+            Pedra, papel ou tesoura?
+        </p>
 
-    <select id="jogada" name="jogada">
+        <div id="jogo"></div>
 
-        <option value="" disabled selected hidden>
+        <h1 id="nomeJogador"></h1>
 
-            Escolha a sua jogada
+        <label class="label" for="jogada">
+            Selecione sua jogada
+        </label>
 
-        </option>
+        <select id="jogada" name="jogada">
 
-        <option value="pedra">Pedra</option>
+            <option value="" disabled selected hidden>
+                Escolha a sua jogada
+            </option>
 
-        <option value="papel">Papel</option>
+            <option value="pedra">Pedra</option>
 
-        <option value="tesoura">Tesoura</option>
+            <option value="papel">Papel</option>
 
-    </select>
+            <option value="tesoura">Tesoura</option>
 
-    <button id="botaoEnviar" onclick="enviar()" disabled>
+        </select>
 
-        Enviar Jogada
+        <button id="botaoEnviar" onclick="enviar()" disabled>
+            Enviar Jogada
+        </button>
 
-    </button>
+        <p id="status"></p>
 
-    <p id="status"></p>
+    </div>
 
-    <button id="botaoJogarNovamente" onclick="jogarNovamente()" disabled>
-        Jogar novamente
-    </button>
 
     <script>
 
@@ -56,49 +206,34 @@
 
         };
 
+
         socket.onmessage = function (evento) {
 
             const dados = JSON.parse(evento.data);
 
 
-            // if (dados.tipo === "resultado") {
+            if (dados.tipo === "sala_cheia") {
 
-            //     document.getElementById("status").innerText = dados.mensagem;
+                document.getElementById("status").innerText =
+                    "Sala cheia! Aguarde a proxima partida.";
 
-            //     document.getElementById("jogada").value = "";
+                document.getElementById("jogada").disabled = true;
 
-            //     document.getElementById("jogada").disabled = false;
+                document.getElementById("botaoEnviar").disabled = true;
 
-            //     document.getElementById("botaoEnviar").disabled = false;
+                socket.close();
 
-            // }
+                alert("Sala cheia! Aguarde a proxima partida.");
 
-            if (dados.tipo === "vitoria" && dados.jogador === numeroJogador) {
-                console.log(dados.mensagem);
-                document.getElementById("status").innerText = dados.mensagem;
-                document.getElementById("botaoJogarNovamente").disabled = false;
             }
 
-            else if (dados.tipo === "derrota" && dados.jogador === numeroJogador) {
-                console.log(dados.mensagem);
-                document.getElementById("status").innerText = dados.mensagem;
-                document.getElementById("botaoJogarNovamente").disabled = false;
-            }
 
-            else if (dados.tipo === "empate") {
-                document.getElementById("status").innerText = dados.mensagem;
-                document.getElementById("botaoJogarNovamente").disabled = false;
-            }
+            if (dados.tipo === "resultado") {
 
-            if (dados.tipo === "conexao") {
+                document.getElementById("status").innerText =
+                    dados.mensagem;
 
-                numeroJogador = dados.jogador;
-
-                document.getElementById("nomeJogador").innerText =
-
-                    "Voce eh o  " + numeroJogador;
-
-                console.log("Eu sou o jogador:", dados.jogador);
+                document.getElementById("jogada").value = "";
 
                 document.getElementById("jogada").disabled = false;
 
@@ -107,31 +242,67 @@
             }
 
 
+            if (dados.tipo === "vitoria" && dados.jogador === numeroJogador) {
+
+                document.getElementById("status").innerText =
+                    dados.mensagem;
+
+                document.getElementById("jogada").disabled = false;
+
+                document.getElementById("botaoEnviar").disabled = false;
+
+                document.getElementById("jogada").value = "";
+
+            }
+
+
+            else if (dados.tipo === "derrota" && dados.jogador === numeroJogador) {
+
+                document.getElementById("status").innerText =
+                    dados.mensagem;
+
+                document.getElementById("jogada").disabled = false;
+
+                document.getElementById("botaoEnviar").disabled = false;
+
+                document.getElementById("jogada").value = "";
+
+            }
+
+
+            if (dados.tipo === "conexao") {
+
+                document.getElementById("nomeJogador").innerText =
+                    "Voce eh o " + dados.jogador;
+
+                numeroJogador = dados.jogador;
+
+                document.getElementById("jogada").disabled = false;
+
+                document.getElementById("botaoEnviar").disabled = false;
+
+            }
+
 
             if (dados.tipo === "jogada") {
 
-                console.log("O", dados.jogador, "jogou", dados.valor);
+                console.log(
+                    "O",
+                    dados.jogador,
+                    "jogou",
+                    dados.valor
+                );
 
             }
 
         };
 
-        function jogarNovamente() {
-
-            document.getElementById("status").innerText = "";
-
-            document.getElementById("jogada").value = "";
-
-            document.getElementById("jogada").disabled = false;
-
-            document.getElementById("botaoEnviar").disabled = false;
-
-            document.getElementById("botaoJogarNovamente").disabled = true;
-        }
 
         function enviar() {
 
-            const valorJogada = document.getElementById("jogada").value;
+            const valorJogada =
+                document.getElementById("jogada").value;
+
 
             if (valorJogada === "") {
 
@@ -140,6 +311,7 @@
                 return;
 
             }
+
 
             const mensagem = {
 
@@ -154,9 +326,10 @@
 
             socket.send(JSON.stringify(mensagem));
 
-            document.getElementById("status").innerText =
 
+            document.getElementById("status").innerText =
                 "Aguardando o outro jogador...";
+
 
             document.getElementById("jogada").disabled = true;
 
