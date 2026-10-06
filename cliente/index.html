@@ -228,20 +228,6 @@
             }
 
 
-            if (dados.tipo === "resultado") {
-
-                document.getElementById("status").innerText =
-                    dados.mensagem;
-
-                document.getElementById("jogada").value = "";
-
-                document.getElementById("jogada").disabled = false;
-
-                document.getElementById("botaoEnviar").disabled = false;
-
-            }
-
-
             if (dados.tipo === "vitoria" && dados.jogador === numeroJogador) {
 
                 document.getElementById("status").innerText =
@@ -267,6 +253,16 @@
 
                 document.getElementById("jogada").value = "";
 
+            }
+            else if(dados.tipo === "empate"){
+                document.getElementById("status").innerText =
+                    dados.mensagem;
+
+                document.getElementById("jogada").disabled = false;
+
+                document.getElementById("botaoEnviar").disabled = false;
+
+                document.getElementById("jogada").value = "";
             }
 
 

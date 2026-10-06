@@ -1,21 +1,30 @@
 import asyncio
 import websockets
 import json
-from jogo import verificar_vencedor
-from sala import clientes, lock, jogadores, registrar_jogada, pegar_jogadas, limpar_jogadas, definir_jogador
+from jogo import verificarGanhador
 
-
+clientes = set()
+lock = asyncio.Lock()
+jogadores = {}
+jogador = 0
+jogada1 = ""
+jogada2 = ""
 jogador1 = False
-jogador2 = False        
+jogador2 = False
 
 async def servidor(websocket):
+    global jogador
+    global jogada1, jogada2
+    global jogador1, jogador2
     vitorioso = 0
     perdedor = 0
     async with lock:
         
-        jogador = definir_jogador()
-
-        if jogador is None:
+        if "jogador 1" not in jogadores.values():
+            jogador = 1
+        elif "jogador 2" not in jogadores.values():
+            jogador = 2
+        else:
             await websocket.send(json.dumps({
                 "tipo": "sala_cheia",
                 "mensagem": "Sala cheia. Aguarde a proxima partida."}))
@@ -44,64 +53,70 @@ async def servidor(websocket):
                 async with lock:
                     jogador1 = False
                     jogador2 = False
-                    registrar_jogada(dados.get("jogador"), dados.get("valor"))
+                    empate = False
+                    if dados.get("jogador") == "jogador 1":
+                        jogada1 = dados.get("valor")
 
-                    jogada1, jogada2 = pegar_jogadas()
+                    if dados.get("jogador") == "jogador 2":
+                        jogada2 = dados.get("valor")
 
                     print("Jogador 1:", jogada1)
                     print("Jogador 2:", jogada2)
 
-                    if jogada1 != "" and jogada2 != "":
+                resultado = verificarGanhador(jogada1, jogada2)
 
-                        resultado = verificar_vencedor(jogada1, jogada2)
+                if resultado == "Jogador 1 venceu":
+                    jogador1 = True
 
-                        if resultado == "Jogador 1 venceu":
-                            jogador1 = True
+                elif resultado == "Jogador 2 venceu":
+                    jogador2 = True
 
-                        elif resultado == "Jogador 2 venceu":
-                            jogador2 = True
+                elif resultado == "Empate":
+                    empate = True
 
-                        print(resultado)
+                if jogador1:
+                    vitorioso = "jogador 1"
+                    perdedor = "jogador 2"
 
-                        mensagem_resultado = {
-                            "tipo": "resultado",
-                            "mensagem": resultado
-                        }
+                elif jogador2:
+                    vitorioso = "jogador 2"
+                    perdedor = "jogador 1"
 
-                        for cliente in clientes:
-                            await cliente.send(json.dumps(mensagem_resultado))
 
-                        if jogador1:
-                            vitorioso = "jogador 1"
-                            perdedor = "jogador 2"
 
-                        elif jogador2:
-                            vitorioso = "jogador 2"
-                            perdedor = "jogador 1"
+                mensagemVitoria = {
+                "jogador": vitorioso,
+                "tipo": "vitoria",
+                "mensagem": "Você venceu!"
+                }
 
-                        mensagemVitoria = {
-                            "jogador": vitorioso,
-                            "tipo": "vitoria",
-                            "mensagem": "Você venceu!"
-                        }
+                mensagemEmpate = {
+                    "tipo": "empate",
+                    "mensagem" : "Deu empate pô :<"
+                }
 
-                        mensagemDerrota = {
-                            "jogador": perdedor,
-                            "tipo": "derrota",
-                            "mensagem": "Você perdeu!"
-                        }
+                mensagemDerrota = {
+                    "jogador": perdedor,
+                    "tipo": "derrota",
+                    "mensagem": "Você perdeu!"
+                }
 
-                        for cliente in clientes:
+                for cliente in clientes:
 
-                            if jogadores[cliente] == vitorioso:
-                                await cliente.send(json.dumps(mensagemVitoria))
-                                print(mensagemVitoria)
+                    if jogadores[cliente] == vitorioso:
+                        await cliente.send(json.dumps(mensagemVitoria))
+                        print(mensagemVitoria)
 
-                            elif jogadores[cliente] == perdedor:
-                                await cliente.send(json.dumps(mensagemDerrota))
-                                print(mensagemDerrota)
+                    elif jogadores[cliente] == perdedor:
+                        await cliente.send(json.dumps(mensagemDerrota))
+                        print(mensagemDerrota)
 
-                        limpar_jogadas()    
+                    elif empate:
+                        await cliente.send(json.dumps(mensagemEmpate))
+                        print(mensagemEmpate)
+
+                        jogada1 = ""
+                        jogada2 = ""
 
                         jogador1 = False
                         jogador2 = False
@@ -109,6 +124,8 @@ async def servidor(websocket):
 
         clientes.remove(websocket)
         del jogadores[websocket]
+        jogada1 = ""
+        jogada2 = ""
 
         print("Cliente saiu")
         print("Jogadores Conectados", len(clientes))
