@@ -1,31 +1,27 @@
 # Jokenpo WebSocket
 
-Jogo de Jokenpo desenvolvido em Python e HTML/JavaScript utilizando WebSocket para comunicação em tempo real entre os jogadores.
+Jogo de Jokenpo desenvolvido em Python e HTML/JavaScript usando WebSocket para fazer a comunicação entre os jogadores em tempo real.
 
 ## Tecnologias utilizadas
 
-* Python
-* WebSocket
-* HTML
-* CSS
-* JavaScript
-* Biblioteca `websockets` para Python
+- Python
+- HTML
+- CSS
+- JavaScript
+- WebSocket
+- Biblioteca `websockets`
 
 ## Como instalar
 
-### 1. Instalar o Python
+É necessário ter o Python instalado.
 
-É necessário ter o Python instalado no computador.
-
-Para verificar se o Python está instalado:
+Para verificar:
 
 ```bash
 python --version
 ```
 
-### 2. Instalar a biblioteca WebSocket
-
-No terminal, execute:
+Depois, instale a biblioteca utilizada pelo servidor:
 
 ```bash
 pip install websockets
@@ -33,95 +29,47 @@ pip install websockets
 
 ## Como executar
 
-### 1. Iniciar o servidor
-
-Abra o terminal na pasta do projeto e execute:
+Primeiro, abra o terminal na pasta principal do projeto e execute:
 
 ```bash
-python servidor.py
+python servidor/servidor.py
 ```
 
-Se o servidor estiver funcionando corretamente, aparecerá:
+Se estiver funcionando, aparecerá:
 
 ```text
 Servidor WebSocket funcionando
 ```
 
-O servidor será executado em:
+O servidor utiliza a porta `6969`.
+
+Depois de iniciar o servidor, abra o arquivo:
 
 ```text
-ws://localhost:6969
+cliente/index.html
 ```
 
-### 2. Abrir o jogo
+em um navegador.
 
-Depois de iniciar o servidor, abra o arquivo HTML do cliente em um navegador.
+Para jogar, é necessário abrir o jogo em duas abas ou janelas. O primeiro jogador conectado será o Jogador 1 e o segundo será o Jogador 2.
 
-Para iniciar uma partida, é necessário abrir o jogo em duas janelas ou abas do navegador.
-
-O primeiro jogador conectado será identificado como **Jogador 1** e o segundo como **Jogador 2**.
-
-Caso um terceiro jogador tente entrar enquanto houver dois jogadores conectados, a sala será considerada cheia.
+Se um terceiro jogador tentar entrar enquanto já houver dois jogadores, a sala será considerada cheia.
 
 ## Como jogar
 
-1. Inicie o servidor Python.
-2. Abra o arquivo HTML em duas abas ou janelas.
-3. Cada jogador receberá sua identificação.
-4. Escolha entre:
-
-   * Pedra
-   * Papel
-   * Tesoura
-5. Clique em **Enviar Jogada**.
-6. O servidor recebe as duas jogadas e verifica o resultado.
-7. O resultado é enviado aos jogadores.
+1. Inicie o servidor.
+2. Abra o `index.html` em duas abas ou janelas.
+3. Cada jogador recebe sua identificação.
+4. Escolha Pedra, Papel ou Tesoura.
+5. Clique em "Enviar Jogada".
+6. Quando os dois jogadores escolherem, o servidor verifica o resultado.
+7. O resultado é enviado para os jogadores.
 
 ### Regras
 
-* Pedra vence Tesoura.
-* Tesoura vence Papel.
-* Papel vence Pedra.
-* Se os dois jogadores escolherem a mesma opção, ocorre empate.
+- Pedra vence Tesoura.
+- Tesoura vence Papel.
+- Papel vence Pedra.
+- Duas jogadas iguais resultam em empate.
 
-## Estrutura do projeto
-
-```text
-Jokempo-WebSocket/
-│
-├── servidor/
-│   └── servidor.py
-│
-└── cliente/
-    └── index.html
-```
-
-## Comunicação
-
-O cliente se conecta ao servidor utilizando WebSocket:
-
-```text
-Cliente HTML/JavaScript
-        ↓
-    WebSocket
-        ↓
-Servidor Python
-        ↓
-    WebSocket
-        ↓
-Cliente HTML/JavaScript
-```
-
-As mensagens são enviadas em formato JSON.
-
-Exemplo de uma jogada:
-
-```json
-{
-    "tipo": "jogada",
-    "jogador": "jogador 1",
-    "valor": "pedra"
-}
-```
-
-O servidor processa as jogadas e envia o resultado para os clientes conectados.
+##
