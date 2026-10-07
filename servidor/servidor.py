@@ -1,11 +1,12 @@
 import asyncio
 import websockets
 import json
-from evento import processarJogada, criarMensagem
-from sala import clientes, jogadores, adicionarJogador, removerJogador, registrarJogada, obterJogadas, limparJogadas
+from evento import processarJogada, verificarEvento
+from sala import clientes, jogadores, adicionarJogador, removerJogador, limparJogadas
 
 
 lock = asyncio.Lock()
+
 
 async def servidor(websocket):
 
@@ -37,27 +38,28 @@ async def servidor(websocket):
 
             dados = json.loads(mensagem)
 
-            if dados.get("tipo") == "jogada":
-                async with lock:
-                    registrarJogada(dados.get("jogador"), dados.get("valor"))
-                    jogada1, jogada2 = obterJogadas()
-                    
+            jogadas = verificarEvento(dados)
+
+            if jogadas is not None:
+
+                jogada1, jogada2 = jogadas
 
                 print("Jogador 1:", jogada1)
                 print("Jogador 2:", jogada2)
 
-                resultado = processarJogada(jogada1, jogada2)
+                mensagens = processarJogada(jogada1, jogada2)
 
-                if resultado == "Aguardando":
+                if mensagens is None:
                     continue
 
-                mensagem1, mensagem2 = criarMensagem(resultado)
+                mensagem1, mensagem2 = mensagens
 
                 for cliente in clientes:
-                    if resultado == "Empate":
+
+                    if mensagem1.get("tipo") == "empate":
                         await cliente.send(json.dumps(mensagem1))
                         print(mensagem1)
-                        
+
                     elif jogadores[cliente] == mensagem1.get("jogador"):
                         await cliente.send(json.dumps(mensagem1))
                         print(mensagem1)
@@ -65,7 +67,9 @@ async def servidor(websocket):
                     elif jogadores[cliente] == mensagem2.get("jogador"):
                         await cliente.send(json.dumps(mensagem2))
                         print(mensagem2)
+
                 limparJogadas()
+
     finally:
 
         removerJogador(websocket)
@@ -73,10 +77,14 @@ async def servidor(websocket):
         print("Cliente saiu")
         print("Jogadores Conectados", len(clientes))
 
+
 async def main():
+
     async with websockets.serve(servidor, "localhost", 6969):
+
         print("Servidor WebSocket funcionando")
 
         await asyncio.Future()
-        
+
+
 asyncio.run(main())

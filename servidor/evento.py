@@ -1,10 +1,15 @@
 from jogo import verificarGanhador
+from sala import registrarJogada, obterJogadas
 
 
 def processarJogada(jogada1, jogada2):
+
     resultado = verificarGanhador(jogada1, jogada2)
 
-    return resultado
+    if resultado == "Aguardando":
+        return None
+
+    return criarMensagem(resultado)
 
 
 def criarMensagem(resultado):
@@ -51,3 +56,16 @@ def criarMensagem(resultado):
         return mensagemEmpate, mensagemEmpate
 
     return None, None
+
+
+def verificarEvento(dados):
+
+    if dados.get("tipo") == "jogada":
+        jogador = dados.get("jogador")
+        valor = dados.get("valor")
+
+        registrarJogada(jogador,valor)
+
+        return obterJogadas()
+
+    return None
