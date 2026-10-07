@@ -1,9 +1,11 @@
 from jogo import verificarGanhador
 
+
 def processarJogada(jogada1, jogada2):
     resultado = verificarGanhador(jogada1, jogada2)
 
     return resultado
+
 
 def criarMensagem(resultado):
 

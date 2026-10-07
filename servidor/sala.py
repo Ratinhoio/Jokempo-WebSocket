@@ -1,6 +1,9 @@
 clientes = set()
 jogadores = {}
 
+jogada1 = ""
+jogada2 = ""
+
 
 def adicionarJogador(websocket):
     if "jogador 1" not in jogadores.values():
@@ -16,7 +19,28 @@ def adicionarJogador(websocket):
     else:
         return None
 
-def removerJogador(websocket):
 
+def removerJogador(websocket):
     clientes.remove(websocket)
     del jogadores[websocket]
+
+
+def registrarJogada(jogador, jogada):
+    global jogada1, jogada2
+
+    if jogador == "jogador 1":
+        jogada1 = jogada
+
+    elif jogador == "jogador 2":
+        jogada2 = jogada
+
+
+def obterJogadas():
+    return jogada1, jogada2
+
+
+def limparJogadas():
+    global jogada1, jogada2
+
+    jogada1 = ""
+    jogada2 = ""
