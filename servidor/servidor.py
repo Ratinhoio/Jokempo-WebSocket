@@ -1,44 +1,40 @@
 import asyncio
 import websockets
 import json
-from jogo import verificarGanhador
+from evento import processarJogada
+from sala import clientes, jogadores, adicionarJogador, removerJogador 
 
-clientes = set()
+
 lock = asyncio.Lock()
-jogadores = {}
-jogador = 0
 jogada1 = ""
 jogada2 = ""
 jogador1 = False
 jogador2 = False
 
 async def servidor(websocket):
-    global jogador
     global jogada1, jogada2
     global jogador1, jogador2
     vitorioso = 0
     perdedor = 0
+
     async with lock:
-        
-        if "jogador 1" not in jogadores.values():
-            jogador = 1
-        elif "jogador 2" not in jogadores.values():
-            jogador = 2
-        else:
+
+        jogador = adicionarJogador(websocket)
+
+        if jogador is None:
             await websocket.send(json.dumps({
                 "tipo": "sala_cheia",
-                "mensagem": "Sala cheia. Aguarde a proxima partida."}))
+                "mensagem": "Sala cheia. Aguarde a proxima partida."
+            }))
+
             await websocket.close(code=1008, reason="Sala cheia")
             return
-        clientes.add(websocket)
-        jogadores[websocket] =f"jogador {jogador}"
-        
 
         print("Cliente conectado")
         print("Jogadores conectados:", len(clientes))
 
         mensagem = {
-            "jogador": f"jogador {jogador}",
+            "jogador": jogador,
             "tipo": "conexao"
         }
 
@@ -63,7 +59,10 @@ async def servidor(websocket):
                     print("Jogador 1:", jogada1)
                     print("Jogador 2:", jogada2)
 
-                resultado = verificarGanhador(jogada1, jogada2)
+                resultado = processarJogada(jogada1, jogada2)
+
+                if resultado == "Aguardando":
+                    continue
 
                 if resultado == "Jogador 1 venceu":
                     jogador1 = True
@@ -115,17 +114,14 @@ async def servidor(websocket):
                         await cliente.send(json.dumps(mensagemEmpate))
                         print(mensagemEmpate)
 
-                        jogada1 = ""
-                        jogada2 = ""
+                    jogada1 = ""
+                    jogada2 = ""
 
-                        jogador1 = False
-                        jogador2 = False
+                    jogador1 = False
+                    jogador2 = False
     finally:
 
-        clientes.remove(websocket)
-        del jogadores[websocket]
-        jogada1 = ""
-        jogada2 = ""
+        removerJogador(websocket)
 
         print("Cliente saiu")
         print("Jogadores Conectados", len(clientes))
