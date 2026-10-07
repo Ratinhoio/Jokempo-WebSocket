@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 import json
-from evento import processarJogada, verificarEvento, selecionarMensagem
+from eventos import processarJogada, verificarEvento, selecionarMensagem
 from sala import clientes, jogadores, adicionarJogador, removerJogador, limparJogadas
 
 
