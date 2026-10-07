@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 import json
-from evento import processarJogada, verificarEvento
+from evento import processarJogada, verificarEvento, selecionarMensagem
 from sala import clientes, jogadores, adicionarJogador, removerJogador, limparJogadas
 
 
@@ -56,17 +56,13 @@ async def servidor(websocket):
 
                 for cliente in clientes:
 
-                    if mensagem1.get("tipo") == "empate":
-                        await cliente.send(json.dumps(mensagem1))
-                        print(mensagem1)
+                    jogador = jogadores[cliente]
 
-                    elif jogadores[cliente] == mensagem1.get("jogador"):
-                        await cliente.send(json.dumps(mensagem1))
-                        print(mensagem1)
+                    mensagem = selecionarMensagem(jogador, mensagem1, mensagem2)
 
-                    elif jogadores[cliente] == mensagem2.get("jogador"):
-                        await cliente.send(json.dumps(mensagem2))
-                        print(mensagem2)
+                    if mensagem is not None:
+                        await cliente.send(json.dumps(mensagem))
+                        print(mensagem)
 
                 limparJogadas()
 

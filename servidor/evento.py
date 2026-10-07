@@ -69,3 +69,17 @@ def verificarEvento(dados):
         return obterJogadas()
 
     return None
+
+
+def selecionarMensagem(jogador, mensagem1, mensagem2):
+
+    if mensagem1.get("tipo") == "empate":
+        return mensagem1
+
+    elif jogador == mensagem1.get("jogador"):
+        return mensagem1
+
+    elif jogador == mensagem2.get("jogador"):
+        return mensagem2
+
+    return None
